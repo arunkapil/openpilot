@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import Enum, IntFlag
+from enum import Enum, IntFlag, StrEnum
 from typing import Dict, List, Union
 
 from cereal import car
@@ -63,7 +63,7 @@ class CanBus:
   camera = 2
 
 
-class CAR:
+class CAR(StrEnum):
   # Global platform
   ASCENT = "SUBARU ASCENT LIMITED 2019"
   ASCENT_2023 = "SUBARU ASCENT 2023"
@@ -114,7 +114,7 @@ CAR_INFO: Dict[str, Union[SubaruCarInfo, List[SubaruCarInfo]]] = {
     SubaruCarInfo("Subaru XV 2020-21"),
   ],
   # TODO: is there an XV and Impreza too?
-  CAR.CROSSTREK_HYBRID: SubaruCarInfo("Subaru Crosstrek Hybrid 2020"),
+  CAR.CROSSTREK_HYBRID: SubaruCarInfo("Subaru Crosstrek Hybrid 2020", car_parts=CarParts.common([CarHarness.subaru_b])),
   CAR.FORESTER_HYBRID: SubaruCarInfo("Subaru Forester Hybrid 2020"),
   CAR.FORESTER: SubaruCarInfo("Subaru Forester 2019-21", "All"),
   CAR.FORESTER_PREGLOBAL: SubaruCarInfo("Subaru Forester 2017-18"),
@@ -310,6 +310,7 @@ FW_VERSIONS = {
       b'\xa2 !`\000',
       b'\xf1\x00\xb2\x06\x04',
       b'\xa2  `\x00',
+      b'\xa2 !3\x00',
     ],
     (Ecu.eps, 0x746, None): [
       b'\x9a\xc0\000\000',
@@ -323,6 +324,7 @@ FW_VERSIONS = {
       b'\x00\x00eq\x1f@ "',
       b'\x00\x00eq\x00\x00\x00\x00',
       b'\x00\x00e\x8f\x00\x00\x00\x00',
+      b'\x00\x00e\xa4\x00\x00\x00\x00',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'\xca!ap\a',
@@ -337,6 +339,7 @@ FW_VERSIONS = {
       b'\xf3"fp\x07',
       b'\xe6"f0\x07',
       b'\xe6"fp\x07',
+      b'\xe6!`@\x07',
     ],
     (Ecu.transmission, 0x7e1, None): [
       b'\xe6\xf5\004\000\000',
@@ -348,6 +351,7 @@ FW_VERSIONS = {
       b'\xe9\xf6F0\x00',
       b'\xe9\xf5B0\x00',
       b'\xe9\xf6B0\x00',
+      b'\xe9\xf5"\x00\x00',
     ],
   },
   CAR.CROSSTREK_HYBRID: {
@@ -664,19 +668,23 @@ FW_VERSIONS = {
   },
   CAR.OUTBACK_2023: {
     (Ecu.abs, 0x7b0, None): [
+      b'\xa1 #\x14\x00',
       b'\xa1 #\x17\x00',
     ],
     (Ecu.eps, 0x746, None): [
+      b'+\xc0\x10\x11\x00',
       b'+\xc0\x12\x11\x00',
     ],
     (Ecu.fwdCamera, 0x787, None): [
       b'\t!\x08\x046\x05!\x08\x01/',
     ],
     (Ecu.engine, 0x7a2, None): [
+      b'\xed,\xa0q\x07',
       b'\xed,\xa2q\x07',
     ],
     (Ecu.transmission, 0x7a3, None): [
       b'\xa8\x8e\xf41\x00',
+      b'\xa8\xfe\xf41\x00',
     ]
   }
 }
@@ -703,3 +711,7 @@ LKAS_ANGLE = {CAR.FORESTER_2022, CAR.OUTBACK_2023, CAR.ASCENT_2023}
 GLOBAL_GEN2 = {CAR.OUTBACK, CAR.LEGACY, CAR.OUTBACK_2023, CAR.ASCENT_2023}
 PREGLOBAL_CARS = {CAR.FORESTER_PREGLOBAL, CAR.LEGACY_PREGLOBAL, CAR.OUTBACK_PREGLOBAL, CAR.OUTBACK_PREGLOBAL_2018}
 HYBRID_CARS = {CAR.CROSSTREK_HYBRID, CAR.FORESTER_HYBRID}
+
+# Cars that temporarily fault when steering angle rate is greater than some threshold.
+# Appears to be all cars that started production after 2020
+STEER_RATE_LIMITED = GLOBAL_GEN2 | {CAR.IMPREZA_2020}
